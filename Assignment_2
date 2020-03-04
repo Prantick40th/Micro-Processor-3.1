@@ -1,0 +1,130 @@
+;Initialization
+CODE	SEGMENT
+ASSUME	CS:CODE,DS:CODE,ES:CODE,SS:CODE
+
+;Programable peripheral interface's
+PPIC_C  EQU 1FH 
+PPIC	EQU 1DH
+PPIB	EQU 1BH
+PPIA 	EQU 19H
+
+;MEMORY Declarion
+	ORG 1000H
+
+	MOV AL, 10000000B	; PPI MODE(1=I/O and 0=reset)
+	OUT PPIC_C, AL
+	
+	;MOV AL, 11110000B	; 4 Led connection
+	;OUT PPIB, AL 
+	
+	MOV	AL,00000000B    ; Initialize
+	OUT	PPIC,AL
+
+
+;First Part
+	CLOCK:
+		MOV AL, 11111110B	;a
+		OUT PPIA, AL
+		CALL DELAY_Function
+		CALL DISPLAY
+
+		MOV AL, 11011111B	;f
+		OUT PPIA, AL
+		CALL DELAY_Function
+		CALL DISPLAY
+
+		MOV AL, 11101111B	;e
+		OUT PPIA, AL
+		CALL DELAY_Function
+		CALL DISPLAY
+
+		MOV AL, 11110111B	;d
+		OUT PPIA, AL
+		CALL DELAY_Function
+		CALL DISPLAY
+
+		MOV AL, 11111011B	;c
+		OUT PPIA, AL
+		CALL DELAY_Function
+		CALL DISPLAY
+
+		MOV AL, 11111101B	;b
+		OUT PPIA, AL
+		CALL DELAY_Function
+		CALL DISPLAY  
+		
+	JMP CLOCK
+		
+
+;Second Part
+DISPLAY:
+	MOV AL, 10001000B	;A
+	OUT PPIA, AL
+	CALL DELAY_Function
+	
+	MOV AL, 10000000B	;B
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	MOV AL, 11000110B	;C
+	OUT PPIA, AL
+	CALL DELAY_Function 
+	
+	CALL FOUR_LED
+
+	MOV AL, 11000000B	;D
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	MOV AL, 10000110B	;E
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	MOV AL, 10001110B	;F
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	RET
+	
+	
+;Third Part
+FOUR_LED PROC 
+	MOV	AL,10000000B
+	OUT	PPIA,AL
+    CALL DELAY_Function   
+	
+    MOV	AL,11110001B  ;lED A
+	OUT	PPIB,AL   
+    CALL DELAY_Function
+	
+	MOV	AL,11111000B  ;LED D
+	OUT	PPIB,AL   
+    CALL DELAY_Function
+	
+	MOV	AL,11110010B  ;LED B
+	OUT	PPIB,AL   
+    CALL DELAY_Function
+	
+	MOV	AL,11110100B  ;LED C
+	OUT	PPIB,AL   
+    CALL DELAY_Function 
+	
+	RET
+
+
+;Timer
+DELAY_Function:
+	MOV CX, 0
+	TIMER:
+		NOP ; NO_operation
+		NOP
+		NOP
+		NOP  
+		NOP
+		LOOP TIMER
+	RET
+
+	
+CODE ENDS 
+
+END
