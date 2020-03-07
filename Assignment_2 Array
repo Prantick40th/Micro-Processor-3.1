@@ -111,3 +111,133 @@ LED_4 :	; ACTIVE HIGH
 
 CODE ENDS
 END
+
+
+;Assignmet_2
+;17.02.04.029
+;17.02.04.030
+;17.02.04.032
+
+;Initialization
+CODE	SEGMENT
+ASSUME	CS:CODE,DS:CODE,ES:CODE,SS:CODE
+
+;Programable peripheral interface's
+PPIC_C  EQU 1FH 
+PPIC	EQU 1DH
+PPIB	EQU 1BH
+PPIA 	EQU 19H
+
+;MEMORY Declarion
+	ORG 1000H
+
+	MOV AL, 10000000B	; PPI MODE(1=I/O and 0=reset)
+	OUT PPIC_C, AL
+	
+	MOV AL, 11110000B	; 4 Led connection
+	OUT PPIB, AL 
+	
+	MOV	AL,00000000B    ; Initialize
+	OUT	PPIC,AL
+
+
+;First Part
+	
+L2: MOV	SI,ANTI_CLOCK
+L1:	MOV	AL,BYTE PTR CS:[SI]
+	CMP	AL,00H
+	JE	L2
+	OUT	PPIA,AL
+    CALL DELAY_Function   
+	CALL DISPLAY
+	INC	SI
+	JMP	L1
+		
+
+;Second Part
+DISPLAY PROC
+	MOV AL, 10001000B	;A
+	OUT PPIA, AL
+	CALL DELAY_Function
+	
+	MOV AL, 10000000B	;B
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	MOV AL, 11000110B	;C
+	OUT PPIA, AL
+	CALL DELAY_Function
+	
+	CALL LED 
+	CALL LED           ; 4LED Starts
+
+	MOV AL, 11000000B	;D
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	MOV AL, 10000110B	;E
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	MOV AL, 10001110B	;F
+	OUT PPIA, AL
+	CALL DELAY_Function
+
+	RET
+DISPLAY ENDP 
+
+
+;LED Part
+LED PROC
+    MOV	AL,10000000B ;Initialize 7segment as constant
+	OUT	PPIA,AL
+    CALL DELAY_Function 
+    
+    MOV	DI,LED_DATA
+N1:	MOV	AL,BYTE PTR CS:[DI]
+	CMP	AL,00H
+	JE	N2
+	OUT	PPIB,AL
+	CALL DELAY_Function  
+	INC	DI
+	JMP	N1
+N2:	RET                  
+LED ENDP		
+
+
+;Timer
+DELAY_Function:
+	MOV CX, 0
+	TIMER:
+		NOP ; NO_operation
+		NOP
+		NOP
+		NOP  
+		NOP  
+		NOP
+		NOP
+		LOOP TIMER
+	RET 
+	
+	
+
+ANTI_CLOCK :
+    DB	11111110B  ;a   
+	DB	11011111B  ;f 
+	DB	11101111B  ;e 
+	DB	11110111B  ;d 
+	DB	11111011B  ;c 
+	DB	11111101B  ;b 
+	DB	00H
+
+LED_DATA :
+    DB  11110001B  ;a
+    DB  11111000B  ;d
+    DB  11110010B  ;b
+    DB  11110100B  ;c  
+    DB	00H
+
+	
+CODE ENDS 
+
+END
