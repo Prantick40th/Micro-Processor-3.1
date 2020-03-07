@@ -1,3 +1,9 @@
+
+;Assignmet_1
+;17.02.04.029
+;17.02.04.030
+;17.02.04.032
+
 ;Initialization
 CODE	SEGMENT
 ASSUME	CS:CODE,DS:CODE,ES:CODE,SS:CODE
@@ -14,50 +20,28 @@ PPIA 	EQU 19H
 	MOV AL, 10000000B	; PPI MODE(1=I/O and 0=reset)
 	OUT PPIC_C, AL
 	
-	;MOV AL, 11110000B	; 4 Led connection
-	;OUT PPIB, AL 
+	MOV AL, 11110000B	; 4 Led connection
+	OUT PPIB, AL 
 	
 	MOV	AL,00000000B    ; Initialize
 	OUT	PPIC,AL
 
 
 ;First Part
-	CLOCK:
-		MOV AL, 11111110B	;a
-		OUT PPIA, AL
-		CALL DELAY_Function
-		CALL DISPLAY
-
-		MOV AL, 11011111B	;f
-		OUT PPIA, AL
-		CALL DELAY_Function
-		CALL DISPLAY
-
-		MOV AL, 11101111B	;e
-		OUT PPIA, AL
-		CALL DELAY_Function
-		CALL DISPLAY
-
-		MOV AL, 11110111B	;d
-		OUT PPIA, AL
-		CALL DELAY_Function
-		CALL DISPLAY
-
-		MOV AL, 11111011B	;c
-		OUT PPIA, AL
-		CALL DELAY_Function
-		CALL DISPLAY
-
-		MOV AL, 11111101B	;b
-		OUT PPIA, AL
-		CALL DELAY_Function
-		CALL DISPLAY  
-		
-	JMP CLOCK
+	
+L2: MOV	SI,ANTI_CLOCK
+L1:	MOV	AL,BYTE PTR CS:[SI]
+	CMP	AL,00H
+	JE	L2
+	OUT	PPIA,AL
+    CALL DELAY_Function   
+	CALL DISPLAY
+	INC	SI
+	JMP	L1
 		
 
 ;Second Part
-DISPLAY:
+DISPLAY PROC
 	MOV AL, 10001000B	;A
 	OUT PPIA, AL
 	CALL DELAY_Function
@@ -68,9 +52,9 @@ DISPLAY:
 
 	MOV AL, 11000110B	;C
 	OUT PPIA, AL
-	CALL DELAY_Function 
+	CALL DELAY_Function
 	
-	CALL FOUR_LED
+	CALL LED            ; 4LED Starts
 
 	MOV AL, 11000000B	;D
 	OUT PPIA, AL
@@ -85,31 +69,33 @@ DISPLAY:
 	CALL DELAY_Function
 
 	RET
-	
-	
-;Third Part
-FOUR_LED PROC 
-	MOV	AL,10000000B
+DISPLAY ENDP 
+
+
+
+LED PROC 
+	MOV	AL,10000000B ;Initialize 7segment as constant
 	OUT	PPIA,AL
-    CALL DELAY_Function   
-	
-    MOV	AL,11110001B  ;lED A
+    CALL DELAY_Function  
+  
+    MOV	AL,11110001B  ;a
 	OUT	PPIB,AL   
-    CALL DELAY_Function
+	CALL DELAY_Function 
 	
-	MOV	AL,11111000B  ;LED D
+	MOV	AL,11111000B   ;d
 	OUT	PPIB,AL   
-    CALL DELAY_Function
+	CALL DELAY_Function 
 	
-	MOV	AL,11110010B  ;LED B
+	MOV	AL,11110010B   ;b
 	OUT	PPIB,AL   
-    CALL DELAY_Function
+	CALL DELAY_Function 
 	
-	MOV	AL,11110100B  ;LED C
+	MOV	AL,11110100B    ;c
 	OUT	PPIB,AL   
-    CALL DELAY_Function 
+	CALL DELAY_Function  
 	
-	RET
+	RET                  
+LED ENDP
 
 
 ;Timer
@@ -120,11 +106,178 @@ DELAY_Function:
 		NOP
 		NOP
 		NOP  
+		NOP  
+		NOP
 		NOP
 		LOOP TIMER
-	RET
+	RET 
+	
+	
+
+ANTI_CLOCK :
+    DB	11111110B  ;a   
+	DB	11011111B  ;f 
+	DB	11101111B  ;e 
+	DB	11110111B  ;d 
+	DB	11111011B  ;c 
+	DB	11111101B  ;b 
+	DB	00H
 
 	
 CODE ENDS 
 
 END
+
+
+
+                           CODE	SEGMENT
+	ASSUME	CS:CODE,DS:CODE,ES:CODE,SS:CODE
+	
+	
+
+PPIC_C	EQU	1FH
+PPIC	EQU	1DH
+PPIB	EQU	1BH
+PPIA	EQU	19H
+	;	
+	ORG	1000H
+	MOV	AL,10000000B
+	OUT	PPIC_C,AL                           
+	
+	;
+	MOV	AL,00000000B
+	OUT	PPIC,AL
+	;
+	
+L2: MOV	SI,OFFSET DATA
+L1:	MOV	AL,BYTE PTR CS:[SI]
+	CMP	AL,00H
+	JE	L2
+	OUT	PPIA,AL
+	CALL	TIMER 
+	CALL	TIMER 
+	CALL	TIMER    
+	CALL LETTER
+	INC	SI
+	JMP	L1	
+	
+	
+
+	LETTER PROC 
+	      
+	;A letter
+
+	MOV	AL,10001000B
+	OUT	PPIA,AL
+	CALL	TIMER 
+	CALL	TIMER 
+	CALL	TIMER      
+	
+	;B letter
+	MOV	AL,10000000B
+	OUT	PPIA,AL
+     CALL	TIMER 
+     CALL	TIMER 
+     CALL	TIMER  
+	             
+	;C letter
+	MOV	AL,11000110B
+	OUT	PPIA,AL
+     CALL	TIMER
+     CALL	TIMER 
+     CALL	TIMER    
+	
+	CALL LED
+	
+	;D letter
+	MOV	AL,11000000B
+	OUT	PPIA,AL
+	CALL	TIMER  
+	CALL	TIMER 
+	CALL	TIMER  
+	
+	;E letter 
+	MOV	AL,10000110B
+	OUT	PPIA,AL
+	CALL	TIMER  
+	CALL	TIMER 
+	CALL	TIMER  
+	             
+	;F letter
+	MOV	AL,10001110B
+	OUT	PPIA,AL
+    CALL	TIMER
+    CALL	TIMER 
+    CALL	TIMER  
+	
+	RET
+	                  
+	LETTER ENDP 
+     
+   
+
+LED PROC 
+	 MOV	AL,10000000B
+	OUT	PPIA,AL
+	CALL TIMER 
+	CALL	TIMER 
+	CALL	TIMER   
+	
+	
+  
+   MOV	AL,11110001B  ;led a
+	OUT	PPIB,AL   
+	CALL TIMER  
+	CALL	TIMER 
+	CALL	TIMER 
+	
+	 MOV	AL,11111000B   ;led d
+	OUT	PPIB,AL   
+	CALL TIMER 
+	CALL	TIMER 
+	CALL	TIMER 
+	
+	 MOV	AL,11110010B   ;led b
+	OUT	PPIB,AL   
+	CALL TIMER 
+	CALL	TIMER 
+	CALL	TIMER 
+	
+	 MOV	AL,11110100B    ;led c
+	OUT	PPIB,AL   
+	CALL TIMER 
+	CALL	TIMER 
+	CALL	TIMER  
+	
+
+    
+	
+	RET
+	                  
+	LED ENDP 	 
+	 
+	
+TIMER:	MOV	CX,0
+TIMER1:	NOP
+	NOP
+	NOP
+	NOP
+	LOOP	TIMER1
+     RET
+	;
+  DATA:DB	11111110B  ;a display  
+
+	DB	11011111B  ;f display
+	
+	DB	11101111B  ;e display
+	
+	DB	11110111B  ;d display 
+	
+	DB	11111011B  ;c display 
+	
+	DB	11111101B  ;b display
+	DB	00H
+
+CODE	ENDS
+	END
+
