@@ -1,0 +1,128 @@
+
+ORG 100h
+
+CODE	SEGMENT
+	ASSUME	CS:CODE,DS:CODE,ES:CODE,SS:CODE
+	
+	
+    ;PPI1
+    PPIC_C	EQU	1FH  
+    PPIC	EQU	1DH
+    PPIB	EQU	1BH
+    PPIA	EQU	19H 
+    
+    ;PPI2 
+    MAT_C	EQU	1EH 
+    MATC	EQU	1CH 
+    MATB	EQU	1AH
+    MATA	EQU	18H
+
+
+
+	ORG	1000H
+	MOV	AL,10000000B
+	OUT	MAT_C,AL
+	OUT	PPIC_C,AL
+	
+	
+	MOV AH,11111110B   ;ROL CHEACKER
+	
+L2:	MOV SI,OFFSET DATA
+	MOV BL,10          ;PATTERN 0-9
+
+
+	
+L1:	MOV AL,11111111B   ;DOT MATRIX
+	OUT MATC,AL
+	
+	MOV AL,AH
+	OUT MATA,AL
+	OUT MATB,AL
+	
+    CALL TIMER
+	
+	
+    MOV	AL,BYTE PTR CS:[SI]
+    OUT PPIA,AL
+    
+    
+    CALL TIMER
+    
+    
+    CALL LED
+    
+    
+    
+    ROL AH
+    INC SI
+    DEC BL
+    JZ  L2
+	JMP L1
+     
+   
+
+LED PROC   
+	
+    MOV	AL,11110001B   ;led a
+	OUT	PPIB,AL   
+	CALL TIMER  
+	CALL TIMER 
+	 
+	
+	MOV	AL,11110010B   ;led b
+	OUT	PPIB,AL   
+	CALL TIMER 
+	CALL TIMER 
+	
+	
+	MOV	AL,11110100B   ;led c
+	OUT	PPIB,AL   
+	CALL TIMER 
+	CALL TIMER 
+
+	
+	MOV	AL,11111000B   ;led d
+	OUT	PPIB,AL   
+	CALL TIMER 
+	CALL TIMER 
+ 
+	
+    RET
+	                  
+LED ENDP 	 
+	 
+	
+TIMER:	MOV	CX,0FFFFH
+TIMER1:	
+    NOP
+	NOP
+	NOP
+	NOP   
+	NOP
+	LOOP	TIMER1
+    RET
+     
+     
+DATA :
+    DB      11000000B ;0
+    DB      11111001B ;1
+    DB      10100100B ;2
+    DB      10110000B ;3
+    DB      10011001B ;4
+    DB      10010010B ;5
+    DB      10000010B ;6
+    DB      11111000B ;7
+    DB      10000000B ;8
+    DB      10010000B ;9
+        
+        
+
+
+CODE	ENDS
+	END
+
+
+
+
+
+
